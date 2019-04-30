@@ -11,10 +11,10 @@ server.listen(4000, () => {
   console.log('\n***** Server running on localhost:4000 *****\n')
 })
 
-const sendUserError = (status, message, res) => {
-  res.status(status).json({ errorMessage: message });
-  return;
-}
+// const sendUserError = (status, message, res) => {
+//   res.status(status).json({ errorMessage: message });
+//   return;
+// }
 
 // Home endpoint
 server.get('/', (req, res) => {
@@ -63,17 +63,6 @@ server.get('/api/users/:id', (req, res) => {
     })
 })
 
-//Post to data
-// server.post('/api/users', (req, res) => {
-//   const userInfo = req.body;
-//   db.insert({userInfo})
-//     .then(user => {
-//       res.status(201).json({success: true, user })
-//     })
-//     .catch(err => {
-//       res.status(500).json({success: false, message: err.message})
-//     });
-// });
 
 //Post to data
 server.post('/api/users', (req, res) => {
@@ -97,28 +86,27 @@ server.post('/api/users', (req, res) => {
 });
 
 
-// //Post to Delete
-// server.delete('/api/users/:id', (req, res) => {
-//   const id = req.params.id;
+//Post to Delete
+server.delete('/api/users/:id', (req, res) => {
+  const { id } = req.params;
 
-//   db.remove(id)
-//     .then(() => {
-//       if (id) {
-//         res.status(204).end()
-//       } else {
-//         res.status(404).json({
-//           success:false,
-//           message: "The user with the specified ID does not exist."
-//         })
-//       }
-//     })
-//     .catch(err => {
-//       res.status(500).json({
-//         success: true,
-//         error: "The user could not be removed"
-//       })
-//     })
-// })
+  db.remove(id)
+    .then(res => {
+      if (res === 0) {
+        res.status(404).json({
+          success:false,
+          message: "The user with the specified ID does not exist."
+        })
+      } 
+      res.status(204).json({ success: `User with id: ${id} removed from system`})
+    })
+    .catch(err => {
+      res.status(500).json({
+        success: false,
+        error: "The user could not be removed"
+      })
+    })
+})
 
 // //Post to update
 // server.update('/api/users/:id', (req, res) => {
