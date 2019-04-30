@@ -11,10 +11,10 @@ server.listen(4000, () => {
   console.log('\n***** Server running on localhost:4000 *****\n')
 })
 
-// const sendUserError = (status, message, res) => {
-//   res.status(status).json({ errorMessage: message });
-//   return;
-// }
+const sendUserError = (status, message, res) => {
+  res.status(status).json({ errorMessage: message });
+  return;
+}
 
 // Home endpoint
 server.get('/', (req, res) => {
@@ -108,32 +108,40 @@ server.delete('/api/users/:id', (req, res) => {
     })
 })
 
-// //Post to update
-// server.update('/api/users/:id', (req, res) => {
-//   const { id } = req.params;
-//   const changes = req.body;
-
-//   db.update(id, changes)
-//     .then(updated => {
-//       if(updated === !id) {
-//         res.status(404).json({
-//           success: false,
-//           message: "The user with the specified ID does not exist."
-//         })
-//       } else if (!user.name || !user.bio) {
-//         res.status(400).json({
-//            success: false, 
-//            errorMessage: "Please provide name and bio for the user." 
-//           })
-//       } else {
-//         res.status(200).json({ success: true, updated });
-//       } 
-//     })
-//     .catch(({ code, message }) => {
-//       res.status(500).json({
-//         success: false,
-//         error: "The user information could not be modified."
-//       })
-//     })
-// })
+server.put('/api/users/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, bio } = req.body;
+  if (!name || !bio) {
+    sendUserError(400, 'Must provide name and bio', res);
+    return;
+  }
+  db
+    .update(id, { name, bio })
+    .then(response => {
+      if (response == 0) {
+        sendUserError(
+          404,
+          'The user with the specified ID does not exist.',
+          res
+        );
+        return;
+      }
+      db
+        .findById(id)
+        .then(user => {
+          if (user.length === 0) {
+            sendUserError(404, 'User with that id not found', res);
+            return;
+          }
+          res.json(user);
+        })
+        .catch(error => {
+          sendUserError(500, 'Error looking up user', res);
+        });
+    })
+    .catch(error => {
+      sendUserError(500, 'Something bad happened in the database', res);
+      return;
+    });
+});
 
