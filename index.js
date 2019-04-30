@@ -64,6 +64,18 @@ server.get('/api/users/:id', (req, res) => {
 })
 
 //Post to data
+// server.post('/api/users', (req, res) => {
+//   const userInfo = req.body;
+//   db.insert({userInfo})
+//     .then(user => {
+//       res.status(201).json({success: true, user })
+//     })
+//     .catch(err => {
+//       res.status(500).json({success: false, message: err.message})
+//     });
+// });
+
+//Post to data
 server.post('/api/users', (req, res) => {
   const { name, bio, created_at, updated_at } = req.body;
   if (!name || !bio) {
@@ -76,14 +88,12 @@ server.post('/api/users', (req, res) => {
     created_at,
     updated_at
   })
-    .then(res => {
-      res.status(201).json(res)
-    })
-    .catch(err => {
-      console.log(err);
-      sendUserError(400, error, res);
-      return;
-    });
+  .then(user => {
+    res.status(201).json({success: true, user })
+  })
+  .catch(err => {
+    res.status(500).json({success: false, message: err.message})
+  });
 });
 
 
